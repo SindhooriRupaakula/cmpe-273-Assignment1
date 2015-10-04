@@ -9,20 +9,20 @@ import (
 )
 
 type StockRequest struct {
-    stocks string
-    budget float32
+    Stocks string
+    Budget float32
  }
 
 type StockResponse struct {
-    tradeID int
-    stocks []string
-    unvestedAmount float32
+    TradeID int
+    Stocks []string
+    UnvestedAmount float32
 }
 
 type PortfolioResponse struct {
-  stocks []string
-  cmv float32
-  unvestedAmount float32
+  Stocks []string
+  Cmv float32
+  UnvestedAmount float32
 }
 
 func main() {
@@ -39,9 +39,9 @@ func main() {
 func buyStocks() {
 
     var reqObj StockRequest
-    reqObj.stocks = os.Args[1]
+    reqObj.Stocks = os.Args[1]
     budget64, _  := strconv.ParseFloat(os.Args[2], 32)
-    reqObj.budget = float32(budget64)
+    reqObj.Budget = float32(budget64)
     client, err := jsonrpc.Dial("tcp", "127.0.0.1:1238")
     if err != nil {
         log.Fatal("dialing:", err)
@@ -56,11 +56,11 @@ func buyStocks() {
         }
 
                 fmt.Print("Stocks:")
-                fmt.Println(respObj.stocks)
+                fmt.Println(respObj.Stocks)
                 fmt.Print("TradeID:")
-                fmt.Println(respObj.tradeID)
+                fmt.Println(respObj.TradeID)
                 fmt.Print("UnvestedAmount:")
-                fmt.Println(respObj.unvestedAmount)
+                fmt.Println(respObj.UnvestedAmount)
         }
 
 
@@ -84,9 +84,9 @@ func buyStocks() {
                 }
 
                 fmt.Print("Stocks:")
-                fmt.Println(pfResponseObj.stocks)
+                fmt.Println(pfResponseObj.Stocks)
                 fmt.Print("Current Market Value:")
-                fmt.Println(pfResponseObj.cmv)
+                fmt.Println(pfResponseObj.Cmv)
                 fmt.Print("Unvested Amount:")
-                fmt.Println(pfResponseObj.unvestedAmount)
+                fmt.Println(pfResponseObj.UnvestedAmount)
         }

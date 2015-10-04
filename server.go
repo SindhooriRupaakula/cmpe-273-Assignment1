@@ -1,4 +1,4 @@
- package main
+package main
 
  import (
         "errors"
@@ -39,49 +39,49 @@ type JSONObj struct {
 }
 
 type StockRequest struct {
-    stocks string
-    budget float32
+    Stocks string
+    Budget float32
  }
 
 type StockResponse struct {
-    tradeID int
-    stocks []string
-    unvestedAmount float32
+    TradeID int
+    Stocks []string
+    UnvestedAmount float32
 }
 
 type PortfolioResponse struct {
-  stocks []string
-  cmv float32
-  unvestedAmount float32
+  Stocks []string
+  Cmv float32
+  UnvestedAmount float32
 }
 
 type Share struct {
-  price float32
-  count int
+  Price float32
+  Count int
 }
 
  type Portfolio struct {
-   stocks map[string](*Share)
-   unvestedAmount float32
+   Stocks map[string](*Share)
+   UnvestedAmount float32
  }
 
  type PortfolioCollection struct {
-    portfolios map[int](*Portfolio)
+   Portfolios map[int](*Portfolio)
  }
 
  func (p *PortfolioCollection) RequestParser(sreq *StockRequest, sresp *StockResponse) error {
 
      tradeID++
-     sresp.tradeID = tradeID
-     if p.portfolios == nil {
-             p.portfolios = make(map[int](*Portfolio))
-             p.portfolios[tradeID] = new(Portfolio)
-             p.portfolios[tradeID].stocks = make(map[string]*Share)
+     sresp.TradeID = tradeID
+     if p.Portfolios == nil {
+             p.Portfolios = make(map[int](*Portfolio))
+             p.Portfolios[tradeID] = new(Portfolio)
+             p.Portfolios[tradeID].Stocks = make(map[string]*Share)
      }
 
 
-     stocks := strings.Split(sreq.stocks, ",")
-     budget := float32(sreq.budget)
+     stocks := strings.Split(sreq.Stocks, ",")
+     budget := float32(sreq.Budget)
      var totalSpent float32
      for _, stock := range stocks {
 
@@ -104,63 +104,63 @@ type Share struct {
 
              endResult := stockSymbol + ":" + strconv.Itoa(sharesCount) + ":$" + strconv.FormatFloat(float64(financeAPIPrice), 'f', 2, 32)
 
-             sresp.stocks = append(sresp.stocks, endResult)
+             sresp.Stocks = append(sresp.Stocks, endResult)
 
-             if _, ok := p.portfolios[tradeID]; !ok {
+             if _, ok := p.Portfolios[tradeID]; !ok {
 
                      pfObj := new(Portfolio)
-                     pfObj.stocks = make(map[string]*Share)
-                     p.portfolios[tradeID] = pfObj
+                     pfObj.Stocks = make(map[string]*Share)
+                     p.Portfolios[tradeID] = pfObj
              }
-             if _, ok := p.portfolios[tradeID].stocks[stockSymbol]; !ok {
+             if _, ok := p.Portfolios[tradeID].Stocks[stockSymbol]; !ok {
 
                      shareObj := new(Share)
-                     shareObj.price = financeAPIPrice
-                     shareObj.count = sharesCount
-                     p.portfolios[tradeID].stocks[stockSymbol] = shareObj
+                     shareObj.Price = financeAPIPrice
+                     shareObj.Count = sharesCount
+                     p.Portfolios[tradeID].Stocks[stockSymbol] = shareObj
              } else {
 
-                     total := float32(sharesCountFloat*financeAPIPrice) + float32(p.portfolios[tradeID].stocks[stockSymbol].count)*p.portfolios[tradeID].stocks[stockSymbol].price
-                     p.portfolios[tradeID].stocks[stockSymbol].price = total / float32(sharesCount+p.portfolios[tradeID].stocks[stockSymbol].count)
-                     p.portfolios[tradeID].stocks[stockSymbol].count += sharesCount
+                     total := float32(sharesCountFloat*financeAPIPrice) + float32(p.Portfolios[tradeID].Stocks[stockSymbol].Count)*p.Portfolios[tradeID].Stocks[stockSymbol].Price
+                     p.Portfolios[tradeID].Stocks[stockSymbol].Price = total / float32(sharesCount+p.Portfolios[tradeID].Stocks[stockSymbol].Count)
+                     p.Portfolios[tradeID].Stocks[stockSymbol].Count += sharesCount
              }
 
      }
 
      unvestedAmount := budget - totalSpent
-     sresp.unvestedAmount = unvestedAmount
-     p.portfolios[tradeID].unvestedAmount += unvestedAmount
+     sresp.UnvestedAmount = unvestedAmount
+     p.Portfolios[tradeID].UnvestedAmount += unvestedAmount
      return nil
  }
 
  func (p* PortfolioCollection) CheckPortfolio(tradeID int ,  presp *PortfolioResponse) error {
 
 
-                                      if objValues, ok := p.portfolios[tradeID]; ok {
+                                      if objValues, ok := p.Portfolios[tradeID]; ok {
 
                                      var currentMarketValue float32
-                                     for stockSymbol, p := range objValues.stocks {
+                                     for stockSymbol, p := range objValues.Stocks {
 
                                              financeAPIPrice := YahooAPI(stockSymbol)
 
                                              var result string
-                                             if p.price < financeAPIPrice {
+                                             if p.Price < financeAPIPrice {
                                                      result = "+$" + strconv.FormatFloat(float64(financeAPIPrice), 'f', 2, 32)
-                                             } else if p.price > financeAPIPrice {
+                                             } else if p.Price > financeAPIPrice {
                                                      result = "-$" + strconv.FormatFloat(float64(financeAPIPrice), 'f', 2, 32)
                                              } else {
                                                      result = "$" + strconv.FormatFloat(float64(financeAPIPrice), 'f', 2, 32)
                                              }
-                                             stock := stockSymbol + ":" + strconv.Itoa(p.count) + ":" + result
+                                             stock := stockSymbol + ":" + strconv.Itoa(p.Count) + ":" + result
 
-                                             presp.stocks = append(presp.stocks, stock)
+                                             presp.Stocks = append(presp.Stocks, stock)
 
-                                             currentMarketValue += float32(p.count) * financeAPIPrice
+                                             currentMarketValue += float32(p.Count) * financeAPIPrice
                                      }
-                                     fmt.Print("Unvested amount: ", objValues.unvestedAmount)
+                                     fmt.Print("Unvested amount: ", objValues.UnvestedAmount)
 
-                                     presp.unvestedAmount = objValues.unvestedAmount
-                                     presp.cmv = currentMarketValue
+                                     presp.UnvestedAmount = objValues.UnvestedAmount
+                                     presp.Cmv = currentMarketValue
                              }else {
                                      return errors.New("Trade ID doesnt exist")
                              }
